@@ -4,6 +4,7 @@ const util = require("util");
 const ejs = require("ejs");
 const path = require("path");
 const shortid = require("shortid");
+const AdmZip = require("adm-zip");
 
 const textToSpeech = require("@google-cloud/text-to-speech");
 const app = express();
@@ -27,6 +28,7 @@ app.post("/generateAudio", async (req, res) => {
   });
 
   const generatedFiles = [];
+
   async function generateAudioFiles(array, index) {
     try {
       let fileName = array[0];
@@ -57,7 +59,6 @@ app.post("/generateAudio", async (req, res) => {
       );
       console.log(`Audio content written to file: ${fileName}`);
       generatedFiles.push(fileName);
-      console.log(generatedFiles);
     } catch (error) {
       console.log(json(error));
     }
@@ -65,7 +66,12 @@ app.post("/generateAudio", async (req, res) => {
 
   await Promise.all(promptArray.map(generateAudioFiles));
 
-  res.json({ folder: audioFolder, filenames: generatedFiles });
+  const outputZipPath = `${audioFolder}.zip`;
+  const zip = new AdmZip();
+  zip.addLocalFolder(`${audioFolder}`);
+  fs.writeFileSync(outputZipPath, zip.toBuffer());
+
+  res.json({ zipfile: outputZipPath });
 });
 
 // async function generateAudio(text, cb) {

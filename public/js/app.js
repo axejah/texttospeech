@@ -1,7 +1,12 @@
 const submitBtn = document.getElementById("submit-prompts");
+const zipFileLink = document.getElementById("zipfile-link");
 submitBtn.addEventListener("click", sendData);
 
 function sendData() {
+  if (document.getElementsByTagName("textarea")[0].value === "") {
+    return alert("audio prompts zijn leeg");
+  }
+
   let data = convertToArray();
   fetch("/generateAudio", {
     method: "POST",
@@ -13,8 +18,11 @@ function sendData() {
     },
   })
     .then((data) => data.json())
-    .then((data) => console.log(data))
+    .then((data) => getZipFile(data))
     .catch((err) => console.log(err));
+
+  // clear form after submit
+  document.getElementsByTagName("textarea")[0].value = "";
 }
 
 function convertToArray() {
@@ -28,4 +36,11 @@ function convertToArray() {
     .filter((arr) => arr != "");
 
   return output;
+}
+
+function getZipFile(data) {
+  let url = data.zipfile;
+
+  zipFileLink.href = url.slice(9, url.length);
+  zipFileLink.style.visibility = "visible";
 }
