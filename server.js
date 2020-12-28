@@ -26,8 +26,8 @@ app.post("/generateAudio", async (req, res) => {
     }
   });
 
-  let generatedFiles = [];
-  promptArray.map(async (array) => {
+  const generatedFiles = [];
+  async function generateAudioFiles(array, index) {
     try {
       let fileName = array[0];
       let prompt = array[1];
@@ -61,7 +61,10 @@ app.post("/generateAudio", async (req, res) => {
     } catch (error) {
       console.log(json(error));
     }
-  });
+  }
+
+  await Promise.all(promptArray.map(generateAudioFiles));
+
   res.json({ folder: audioFolder, filenames: generatedFiles });
 });
 
